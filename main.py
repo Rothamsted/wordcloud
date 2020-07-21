@@ -4,21 +4,16 @@ from collections import Counter
 import pandas as pd
 import numpy as np
 import matplotlib
+from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
 
-# import subprocess
-# import sys
-#
-# def install(package):
-#     subprocess.check_call([sys.executable, "-m", "pip", "install", package, '--user'])
-# req = ['matplotlib', 'pandas', 'numpy']
-# [install(mod) for mod in req]
 
-#Takes Username and password for use in the token.
+import matplotlib.pyplot as plt
+% matplotlib inline
+
 api_host = "https://knetminer.com/beta/knetspace"  # The Host of the API
-your_knetspace_username = "xhakanai"
-your_knetspace_password = "verysecureknetpassword"
-#Requests a session to the server.
-session = requests.Session()
+your_knetspace_username = "xhakanai"  #Takes Username and password for use in the token.
+your_knetspace_password = "verysecureknetpassword" #Takes Username and password for use in the token.
+session = requests.Session()  #Requests a session to the server.
 token = session.post(api_host + '/auth/jwt/', json={'username_or_email': your_knetspace_username, 'password': your_knetspace_password}).json() #This authenticates the session.
 me = session.get(api_host + '/api/v1/me').json()
 
@@ -44,7 +39,7 @@ if response.status_code ==  200:
 
     concept_type_dict, concept_count = {}, []
     concept_id_name = []
-    for i in range(0, len(concepts_dict['concepts'])): #For interation within the range of the list and 0
+    for i in range(0, len(concepts_dict['concepts'])):
         concept_count.append(concepts_dict['concepts'][i]['ofType'])
         concept_id_name.append([concepts_dict['concepts'][i]['ofType'], concepts_dict['concepts'][i]['value']])
         try:
@@ -55,7 +50,7 @@ if response.status_code ==  200:
 
     relationships_type_dict, relations_count = {}, []
     relationships_id_name = []
-    for i in range(0, len(relationships_dict['relations'])): #For interation within the range of the list and 0
+    for i in range(0, len(relationships_dict['relations'])):
         relations_count.append(relationships_dict['relations'][i]['ofType'])
         relationships_id_name.append([relationships_dict['relations'][i]['ofType'], relationships_dict['relations'][i]['toConcept']])
         try:
@@ -76,27 +71,31 @@ if response.status_code ==  200:
         for k in concept_type_dict.keys(): # For the Key in the concept_type_dict, if it is the same as to_concept, append the key 1. The same applies to from_concept
             if k == to_concept:
                 if "<span style" not in concept_type_dict[to_concept][1]: # If <span style is found anywhere in the dictionary, remove it.
-                    #print(k, concept_type_dict[k][1])
                     relationship_counts.append(concept_type_dict[k][1])
             if k == from_concept:
                 if "<span style" not in concept_type_dict[from_concept][1]:
                     relationship_counts.append(concept_type_dict[k][1])
 
-    print(dict(Counter(relationship_counts))) # Print the counter.
-            # Put relationship counts into pandas data frame - it's a dict so figure out how to put a dict into a dataframe and what to name the columns
-
-            # Then put into a word cloud using the resource sent with matplotlib
+    relationship_counter=(dict(Counter(relationship_counts)))
 
 
-    relation_count_df = pd.DataFrame(dict(Counter(relationship_counts)))
-    relation_count_df
+    df = pd.DataFrame(relationship_counter.items(), columns = ['Name','ID'])
+    df
 
     for i, toConcept in enumerate(relationships_dict):
         relationships_dict['relations'][i][toConcept] = +1
 
-    concept_relation_count = {concept_type_dict:0}
     for i, v in enumerate(relationships_dict):
         print(v)
+
+    text = text = " ".join(name for name in df.Name)
+    wordcloud = WordCloud().generate(text)
+    plt.imshow(wordcloud, interpolation='bilinear')
+    wordcloud = WordCloud(max_font_size=50, max_words=100, background_color="white").generate(text)
+    plt.figure()
+    plt.axis("off")
+    plt.show()
+
 
 
 else:
