@@ -8,7 +8,8 @@ from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
 
 
 import matplotlib.pyplot as plt
-% matplotlib inline
+%matplotlib inline
+
 
 api_host = "https://knetminer.com/beta/knetspace"  # The Host of the API
 your_knetspace_username = "xhakanai"  #Takes Username and password for use in the token.
@@ -78,23 +79,21 @@ if response.status_code ==  200:
 
     relationship_counter=(dict(Counter(relationship_counts)))
 
+    df = pd.DataFrame(relationship_counter.items(), columns = ['Name','Count'])
+    updated_df = df[df['Name'].apply(lambda x: "PMID" not in x)]
 
-    df = pd.DataFrame(relationship_counter.items(), columns = ['Name','ID'])
-    df
-
-    for i, toConcept in enumerate(relationships_dict):
-        relationships_dict['relations'][i][toConcept] = +1
-
-    for i, v in enumerate(relationships_dict):
-        print(v)
-
-    text = text = " ".join(name for name in df.Name)
+    stopwords = set(STOPWORDS)
+    stopwords.update(["Proteins", "Genes", "Relations", "Concepts"])
+    wordcloud = WordCloud(stopwords=stopwords, background_color="white").generate(text)
+    text = " ".join(name for name in updated_df.Name)
     wordcloud = WordCloud().generate(text)
+    wordcloud = WordCloud(max_font_size=150, max_words=1000, background_color="black").generate(text)
+    background_mask = np.array(Image.open("img/whiteback.png"))
+    plt.figure(figsize=(30,15))
     plt.imshow(wordcloud, interpolation='bilinear')
-    wordcloud = WordCloud(max_font_size=50, max_words=100, background_color="white").generate(text)
-    plt.figure()
-    plt.axis("off")
-    plt.show()
+    plt.axis('off')
+    plt.savefig('filename.png', format="png")
+    #plt.show()
 
 
 
