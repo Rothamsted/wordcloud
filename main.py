@@ -10,15 +10,18 @@ from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
 import matplotlib.pyplot as plt
 %matplotlib inline
 
-
+Username = input("What's your Username?")
+Password = input("What's your Password")
+url = input("Enter a URL")
+if url == "":
+    url = "https://knetminer.com/beta/knetspace/api/v1/networks/acf96c4d-74ff-4fb1-a65a-745c20d2981a/?format=json"
 api_host = "https://knetminer.com/beta/knetspace"  # The Host of the API
-your_knetspace_username = "xhakanai"  #Takes Username and password for use in the token.
-your_knetspace_password = "verysecureknetpassword" #Takes Username and password for use in the token.
+#your_knetspace_username = "xhakanai"  #Takes Username and password for use in the token.
+#your_knetspace_password = "verysecureknetpassword" #Takes Username and password for use in the token.
 session = requests.Session()  #Requests a session to the server.
-token = session.post(api_host + '/auth/jwt/', json={'username_or_email': your_knetspace_username, 'password': your_knetspace_password}).json() #This authenticates the session.
+token = session.post(api_host + '/auth/jwt/', json={'username_or_email': Username, 'password': Password}).json() #This authenticates the session.
 me = session.get(api_host + '/api/v1/me').json()
 
-url = "https://knetminer.com/beta/knetspace/api/v1/networks/acf96c4d-74ff-4fb1-a65a-745c20d2981a/?format=json"
 response = session.get(url) #This establishes a connection to the server.
 
 if response.status_code ==  200:
@@ -60,9 +63,10 @@ if response.status_code ==  200:
             print(f"Failed for iteration {i}")
             pass
 
+    publications_dict = meta_data_dict['abstract']
+
     concept_count = dict(Counter(concept_count))
     relations_count = dict(Counter(relations_count))
-    relationships_dict
 
     # Getting relationship counts
     relationship_counts = []
@@ -83,17 +87,17 @@ if response.status_code ==  200:
     updated_df = df[df['Name'].apply(lambda x: "PMID" not in x)]
 
     stopwords = set(STOPWORDS)
-    stopwords.update(["Proteins", "Genes", "Relations", "Concepts"])
-    wordcloud = WordCloud(stopwords=stopwords, background_color="white").generate(text)
+    stopwords.update(["Proteins", "Genes", "Relations", "Concepts", "PMID", "Protein"])
+    wordcloud = WordCloud(stopwords=stopwords, background_color="white").generate('text')
     text = " ".join(name for name in updated_df.Name)
     wordcloud = WordCloud().generate(text)
     wordcloud = WordCloud(max_font_size=150, max_words=1000, background_color="black").generate(text)
-    background_mask = np.array(Image.open("img/whiteback.png"))
     plt.figure(figsize=(30,15))
     plt.imshow(wordcloud, interpolation='bilinear')
     plt.axis('off')
-    plt.savefig('filename.png', format="png")
-    #plt.show()
+    wordcloud.to_file("wordcloud.png")
+    plt.savefig('plot.png', dpi=300, bbox_inches='tight')
+    plt.show()
 
 
 
