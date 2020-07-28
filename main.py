@@ -11,6 +11,7 @@ import re
 import matplotlib.pyplot as plt
 %matplotlib inline
 
+
 Username = input("What's your Username?")
 Password = input("What's your Password")
 url = input("Enter a URL")
@@ -28,7 +29,6 @@ response = session.get(url) #This establishes a connection to the server.
 if response.status_code ==  200:
     knetspace_json = response.json()
     print(knetspace_json) #This will then print the contents of the web token, i.e the Username, Email, etc, of the account connected the the URL.
-    knetspace_json
     knetspace_json['graph'].keys() #Going through the json
     knetspace_json['graph']['allGraphData']['ondexmetadata'] #Going through parts of the json to find concepts and relations
     meta_data_dict = knetspace_json['graph']['allGraphData']['ondexmetadata'] #Turns out metadata has what is needed
@@ -69,30 +69,32 @@ if response.status_code ==  200:
             concepts_dict['concepts'][i]['ofType']
             if concepts_dict['concepts'][i]['ofType'] == 'Publication':
                 concepts_dict['concepts'][i]['attributes'][2]
-        #if concepts_dict['concepts'][i]['attributes'][2] == 'Chemical':
                 for j in range (0, len(concepts_dict['concepts'][i]['attributes'])):
-                    #print(concepts_dict['concepts'][i]['attributes'][j]['attrname'])
                     if concepts_dict['concepts'][i]['attributes'][j]['attrname'] == 'Abstract':
                         abstract_dict['value'] = concepts_dict['concepts'][i]['attributes'][j]['value']
-                        #print(concepts_dict['concepts'][i]['attributes'][j]['value'])
-
-    abstract_list = []
-    abwords = set(STOPWORDS)
-    stop_words = ['the', 'a', '<span', '', 'is']
-    abwords.update('the', 'a', '<span', '', 'is', 'and', 'of', 'are', 'during', 'which', 'both', 'that', 'on', 'two', 'our', 'in', 'well', 'known', 'about', 'We', 'Show', 'Here', 'also', 'has')
-    af = pd.DataFrame(abstract_count.items(), columns = ['Abstract','Count'])
-    word2 = WordCloud(stopwords=abwords, background_color="black").generate('text')
-    text = " ".join(Abstract for Abstract in af.Abstract)
-    word2 = WordCloud().generate(text)
-    plt.figure(figsize=(30,15))
-    plt.imshow(word2, interpolation='bilinear')
-    plt.axis('off')
-    wordcloud.to_file("word2.png")
-    plt.savefig('plot2.png', dpi=300, bbox_inches='tight')
-    plt.show()
 
     concept_count = dict(Counter(concept_count))
     relations_count = dict(Counter(relations_count))
+    stop_words = ['the', 'a', '<span', '', 'is', 'and', 'of', 'are', 'during', 'which', 'both', 'that', 'on', 'two', 'our', 'in', 'well', 'known', 'about', 'We', 'Show', 'Here', 'also', 'has', None]
+    abstract_list = []
+    abstract_dict
+    for i in abstract_dict['value'].split(' '):
+        for j in range(0,len(stop_words)):
+            if stop_words[j] == i:
+                pass
+            else:
+                abstract_list.append(i)
+
+    abstract_count = dict(Counter(abstract_list))
+    af = pd.DataFrame(abstract_list.items(), columns = ['Abstract','Count'])
+    word2 = WordCloud(background_color="black", collocations=False).generate(text)
+    text = " ".join(Abstract for Abstract in af.Abstract)
+    plt.figure(figsize=(30,15))
+    plt.imshow(word2, interpolation='bilinear')
+    plt.axis('off')
+    wordcloud.to_file("wordcloud2.png")
+    plt.savefig('plot.png', dpi=300, bbox_inches='tight')
+    plt.show()
 
     # Getting relationship counts
     relationship_counts = []
@@ -111,8 +113,6 @@ if response.status_code ==  200:
 
     df = pd.DataFrame(relationship_counter.items(), columns = ['Name','Count'])
     updated_df = df[df['Name'].apply(lambda x: "PMID" not in x)]
-
-    stopwords = set(STOPWORDS)
     stopwords.update(["Proteins", "Genes", "Relations", "Concepts", "PMID", "Protein"])
     wordcloud = WordCloud(stopwords=stopwords, background_color="white").generate('text')
     text = " ".join(name for name in updated_df.Name)
