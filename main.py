@@ -77,7 +77,6 @@ if response.status_code ==  200:
     relations_count = dict(Counter(relations_count))
     stop_words = ['the', 'a', '<span', '', 'is', 'and', 'of', 'are', 'during', 'which', 'both', 'that', 'on', 'two', 'our', 'in', 'well', 'known', 'about', 'We', 'Show', 'Here', 'also', 'has', None]
     abstract_list = []
-    abstract_dict
     for i in abstract_dict['value'].split(' '):
         for j in range(0,len(stop_words)):
             if stop_words[j] == i:
@@ -85,8 +84,8 @@ if response.status_code ==  200:
             else:
                 abstract_list.append(i)
 
-    abstract_count = dict(Counter(abstract_list))
-    af = pd.DataFrame(abstract_list.items(), columns = ['Abstract','Count'])
+    abstract_count_dict = dict(Counter(abstract_list))
+    af = pd.DataFrame(abstract_count_dict.items(), columns = ['Abstract','Count'])
     word2 = WordCloud(background_color="black", collocations=False).generate(text)
     text = " ".join(Abstract for Abstract in af.Abstract)
     plt.figure(figsize=(30,15))
@@ -113,6 +112,7 @@ if response.status_code ==  200:
 
     df = pd.DataFrame(relationship_counter.items(), columns = ['Name','Count'])
     updated_df = df[df['Name'].apply(lambda x: "PMID" not in x)]
+    stopwords=set(STOPWORDS)
     stopwords.update(["Proteins", "Genes", "Relations", "Concepts", "PMID", "Protein"])
     wordcloud = WordCloud(stopwords=stopwords, background_color="white").generate('text')
     text = " ".join(name for name in updated_df.Name)
